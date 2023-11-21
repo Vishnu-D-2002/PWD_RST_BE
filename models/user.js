@@ -9,7 +9,7 @@ const userSchema = mongoose.Schema({
         default:Date.now
     },
     updatedAt:Date
-});
+}, { versionKey: false});
 
 const User = mongoose.model('User', userSchema);
 module.exports = { User };
