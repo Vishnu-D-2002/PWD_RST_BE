@@ -1,8 +1,9 @@
-const express = require('express');
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('../utils/config');
 
-const loginRouter = express.Router();
+const loginRouter = require('express').Router();
 
 loginRouter.post('/', async (req, res) => {
     try {
@@ -11,18 +12,26 @@ loginRouter.post('/', async (req, res) => {
         const user = await User.findOne({ username });
 
         if (!user) {
-            return res.status(401).json({ error: 'Invalid username or password' });
+            return res.status(401).json({ error: 'Invalid username' });
         }
 
         const passwordMatch = await bcrypt.compare(password, user.passwordHash);
 
         if (!passwordMatch) {
-            return res.status(401).json({ error: 'Invalid username or password' });
+            return res.status(401).json({ error: 'Invalid password' });
         }
 
-        // Password is correct, you can proceed with further actions (e.g., generating JWT, session, etc.)
-        res.status(200).json({ message: 'Login successful', user });
-    } catch (error) {
+        const payload = {
+            username: user.username,
+            id:user._id
+        }
+
+        const token = jwt.sign(payload, JWT_SECRET);
+
+        res.status(200).json({ message: 'Login successful', token, name: user.name, username: user.username });
+
+    }
+    catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
