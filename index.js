@@ -11,6 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+console.log("Connecting to MongoDB...");
 mongoose.connect(MONGODB_URI)
     .then(() => {
         info("Connected to MongoDB ...");
