@@ -76,5 +76,30 @@ loginRouter.post('/reset-password', async (req, res) => {
     }
 });
 
+// Added endpoint to handle the actual password reset
+loginRouter.post('/complete-reset', async (req, res) => {
+    try {
+        const { email, randomString, newPassword } = req.body;
+        // Check if the random string matches the stored one in the PasswordReset collection
+        const passwordResetData = await PasswordReset.findOne({ email, randomString });
+        
+        if (!passwordResetData) {
+            return res.status(401).json({ error: 'Invalid random string' });
+        }
+
+        // Reset the password in the User collection
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await User.updateOne({ email }, { $set: { passwordHash: hashedPassword } });
+
+        // Remove the password reset data from the PasswordReset collection
+        await PasswordReset.deleteOne({ email, randomString });
+
+        // Return success message
+        return res.status(200).json({ message: 'Password reset successful' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 module.exports = loginRouter;
