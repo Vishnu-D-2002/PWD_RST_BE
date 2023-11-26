@@ -20,7 +20,7 @@ userRouter.post('/', async (req, res) => {
         await user.save();
         res.status(200).json({ message: "User created successfully", user });
     } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ mesaage: "Internal Server Error",error });
     }
 });
 
